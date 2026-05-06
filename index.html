@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Écran Pub</title>
+
+<style>
+    body {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+
+    /* IMAGE CENTRÉE */
+    #slide {
+        max-width: 100%;
+        max-height: calc(100vh - 80px);
+        object-fit: contain;
+    }
+
+    /* BANDEAU BAS */
+    .banner {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 80px;
+        background: #b8860b;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .banner p {
+        color: red;
+        font-size: 22px;
+        font-weight: bold;
+        font-family: Arial;
+        margin: 0;
+        text-align: center;
+    }
+</style>
+</head>
+
+<body>
+
+<img id="slide" src="" />
+
+<div class="banner">
+    <p>POUR APPARAÎTRE SUR CET ÉCRAN CONTACTER LE 07 69 47 25 74</p>
+</div>
+
+<script>
+
+// 🔥 CONFIG (images GitHub RAW)
+let images = [];
+let index = 0;
+let interval = 5000;
+
+// 🔥 URL config JSON (live)
+const CONFIG_URL = "https://raw.githubusercontent.com/Roroinformatique26/mon-ecran-pub/main/config.json";
+
+// ---------------- CONFIG LIVE ----------------
+async function loadConfig() {
+    try {
+        const url = CONFIG_URL + "?t=" + new Date().getTime(); // anti-cache
+
+        const res = await fetch(url, { cache: "no-store" });
+        const data = await res.json();
+
+        images = data.images || [];
+        interval = data.interval || 5000;
+
+        console.log("✔ Config mise à jour:", images.length, "images");
+
+    } catch (e) {
+        console.log("Erreur config:", e);
+    }
+}
+
+// ---------------- AFFICHAGE IMAGE ----------------
+function showImage() {
+
+    if (images.length === 0) return;
+
+    const img = document.getElementById("slide");
+
+    img.src = images[index] + "?t=" + new Date().getTime(); // anti-cache image
+
+    index++;
+
+    // 🔥 FIN DE CYCLE
+    if (index >= images.length) {
+        index = 0;
+
+        // 🔥 recharge config à chaque cycle complet
+        loadConfig();
+    }
+
+    setTimeout(showImage, interval);
+}
+
+// ---------------- START ----------------
+async function start() {
+    await loadConfig();
+    showImage();
+
+    // 🔥 refresh config en fond toutes les 10 sec
+    setInterval(loadConfig, 10000);
+}
+
+start();
+
+</script>
+
+</body>
+</html>
